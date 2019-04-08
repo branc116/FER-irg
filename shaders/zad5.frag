@@ -38,7 +38,7 @@ vec2 invY(in vec2 point) {
 #define st coord(invY(gl_FragCoord.xy))
 #define mx coord(u_mouse)
 
-in float curV;
+in vec3 curV;
 
 out vec4 color;
 void main() {
@@ -57,8 +57,8 @@ void main() {
     // if (u_color == 0.0) { //undeffined
     //     color = vec4(0.0, 0.0, 0.0, 1.0);
     // }
-    color = vec4(sin(u_color), abs(cos(u_color)), sin(u_color)*cos(u_color), 1.0);
-
+    color = vec4(sin(u_color), abs(cos(gl_FragCoord.z)), abs(sin(gl_FragCoord.z)), 1.0);
+    color = vec4(curV, 1.0);
     // if (curV >= 1.2 || gl_FragCoord.y < u_resolution.y*u_cutoff) {
     //     color = vec4(0.0,0.0,1.0, 1.0);
     // } else {

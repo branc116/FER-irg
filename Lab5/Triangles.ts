@@ -1,21 +1,46 @@
 import { IVector } from "../Helpers/IVector.js";
 import { DrawableAbstract } from "../Drawables/DrawableAbstract.js";
+import { Tetrahedron } from "./Tetrahedron.js";
+import { Vector } from "../Helpers/Helpers.js";
 
 export class Triangles extends DrawableAbstract<Triangles> {
     glDrawArray(gl: WebGLRenderingContext): void {
         gl.uniform1f(this.colorUniform || null, this.color)
-        gl.drawArrays(gl.TRIANGLES, 0, 3 * this.points.length);
+        gl.drawArrays(gl.TRIANGLES, 0, 3 * this.triangles.length);
     }
     getPoints(): Float32Array {
-        return new Float32Array(this.points.map(i => i.map(j => j.toArray()).reduce((p, c) => [...p, ...c])).reduce((prev, cur) => [...prev, ...cur]));
+        const pnts: number[] = [];
+        for (let i=0;i<this.triangles.length;i++) {
+            const ele = this.triangles[i];
+            for (let j = 0; j < ele.length; j++) {
+                const element = ele[j];
+                pnts.push(...element.toArray());
+            }
+        }
+        return new Float32Array(pnts);
     }
     getDimensions(): number {
-        return this.points[0][0].getDimensions();
+        return this.triangles[0][0].getDimensions();
+    }
+    public isInside(point: IVector) {
+        const farrAwayPoint = new Vector([10000*(Math.random() + 1), 10000*(Math.random() + 1), 10000*(Math.random() + 1)]);
+        let intersecrionCount = 0;
+        for(let i = 0; i<this.triangles.length; i++) {
+            const [a, b, c] = this.triangles[i];
+            const ar1 = new Tetrahedron([point, a, b, c]).signedArea();
+            const ar2 = new Tetrahedron([farrAwayPoint, a, b, c]).signedArea();
+            const ar3 = new Tetrahedron([point, farrAwayPoint, a, b]).signedArea();
+            const ar4 = new Tetrahedron([point, farrAwayPoint, b, c]).signedArea();
+            const ar5 = new Tetrahedron([point, farrAwayPoint, c, a]).signedArea();
+            if (Math.sign(ar1) != Math.sign(ar2) && Math.sign(ar3) == Math.sign(ar4) && Math.sign(ar4) == Math.sign(ar5))
+                intersecrionCount++;
+        }
+        return intersecrionCount % 2 == 1;
     }
     public buffer: WebGLBuffer | null = null;
     public readonly type = "Triangles";
 
-    public constructor(public points: [IVector, IVector, IVector][], public colorUniform?: WebGLUniformLocation, public color = 0){
+    public constructor(public triangles: [IVector, IVector, IVector][], public colorUniform?: WebGLUniformLocation, public color = 0){
         super();
     }
 }

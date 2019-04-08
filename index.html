@@ -6,10 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+
 </head>
 
-<body style="padding: 2em; background-color: whitesmoke">
-    <ul class="collapsible">
+<body  style="padding: 2em; background-color: whitesmoke">
+    <ul id="dropzone" class="collapsible">
         <li>
             <div class="collapsible-header">Prvi</div>
             <div class="collapsible-body">
@@ -90,7 +91,17 @@
                 <h1>Zadatak 5_1</h1>
                 <pre><code data-zadatak='Zad5_1' data-target='#Zad5_1' class='javascript'></code></pre>
                 <pre><code id='Zad5_1'></code></pre>
-                <canvas width="570" height="570" id="CZad5"></canvas>
+                <div class="row">
+                    <div class="col s4" style="overflow: hidden;">
+                        <canvas width="570" height="570" id="CZad5"></canvas>
+                    </div>
+                    <div style="max-height: 600px; overflow: auto;" class="col s8">
+                        <textarea id="Zad5input" style="height: 270px;"></textarea>
+                        <input type="text" value="0, 0, 0" id="Zad5testPoint">
+                        <p id="Zad5output">Undeffined</p>
+                        <button id="Zad5norm">Normaliziraj</button>
+                    </div>
+                </div>
             </div>
         </li>
         <li>
@@ -133,7 +144,7 @@
 <link rel="stylesheet" href="/node_modules/materialize-css/dist/css/materialize.min.css">
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.js"></script> -->
 <script src="/node_modules/materialize-css/dist/js/materialize.min.js"></script>
-<link rel="stylesheet" href="hl/styles/darkula.css">
+<link rel="stylesheet" href="/hl/styles/darkula.css">
 <script src="hl/highlight.pack.js"></script>
 <script type="module">
     import * as a from "./site.js"
@@ -141,6 +152,15 @@
         var elems = document.querySelectorAll('.collapsible');
         var instances = M.Collapsible.init(elems);
     });
+</script>
+<script>
+    var dropzone = document.getElementById('dropzone');
+    dropzone.ondrop = function (e) {
+        var length = e.dataTransfer.files.length;
+        for (var i = 0; i < length; i++) {
+            var file = e.dataTransfer.files[i];
+        }
+    };
 </script>
 
 

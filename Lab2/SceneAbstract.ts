@@ -2,6 +2,8 @@ import { Triangle } from "../Drawables/Triangle.js";
 import { Drawable, DrawableTyped } from "../Drawables/Drawable.js";
 import { Vector } from "../Helpers/Helpers.js";
 import { IVector } from "../Helpers/IVector.js";
+import { AbstractCamera } from "../Cameras/AbstractCamera.js";
+import { StationaryCamera } from "../Cameras/StationaryCamera.js";
 export enum MouseButton {
     Left = 1,
     Middle = 2,
@@ -11,7 +13,7 @@ export abstract class SceneAbstract {
     public cam: IVector = new Vector([0, 0, -5]);
     public center: IVector = new Vector([0, 0, 0]);
     public up: IVector = new Vector([0, 1, 0]);
-
+    public camera: AbstractCamera  = new StationaryCamera(new Vector([0, 0, -5]), new Vector([0, 0, 0]));
     public fov: number = Math.PI/4;
     public aspect: number = 1.0;
     public near: number = 0.1;
@@ -43,7 +45,7 @@ export abstract class SceneAbstract {
     private u_globalRotation: null | WebGLUniformLocation = null;
 
     customUnforms: (context: this) => void = () => {};
-    public mouseMove: (context: this) => void = () => {};
+    public mouseMove: (context: this, button: MouseButton) => void = () => {};
     public mouseClick: (context: this, button: MouseButton) => void | boolean = () => {};
 
     constructor(protected canvas: HTMLCanvasElement, private vertexShaderName: string = "zad2_vector_shader.vert", private fragmentShaderName: string = "zad2_frag_shader.frag") {
@@ -73,7 +75,7 @@ export abstract class SceneAbstract {
     private mMove(e: MouseEvent) {
         this.mouseLocation[0] = e.offsetX;
         this.mouseLocation[1] = e.offsetY;
-        this.mouseMove(this);
+        this.mouseMove(this, e.buttons);
     }
     private mClick(e: MouseEvent) {
         return this.mouseClick(this, e.which);
@@ -132,8 +134,8 @@ export abstract class SceneAbstract {
         gl.uniform2fv(this.u_resolution, [this.canvas.width, this.canvas.height]);
         gl.uniform1f(this.u_time, currentTime);
 
-        gl.uniform3fv(this.u_cam, this.cam.toArray());
-        gl.uniform3fv(this.u_center, this.center.toArray());
+        gl.uniform3fv(this.u_cam, this.camera.updateCamLocation(currentTime).toArray());
+        gl.uniform3fv(this.u_center, this.camera.updateLookAt(currentTime).toArray());
         gl.uniform3fv(this.u_up, this.up.toArray());
 
         gl.uniform1f(this.u_fov, this.fov);

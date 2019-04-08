@@ -13,6 +13,8 @@ precision highp float;
 
 in vec3 coordinates;
 
+out vec3 curV;
+
 uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
@@ -180,5 +182,7 @@ mat4 rotation (vec3 angles) {
 }
 void main() {
     gl_Position = perspective(u_fov, u_aspect, u_near, u_far) * lookAt(u_cam, u_center, u_up) * rotation(u_globalRotation) * vec4(coordinates, 1.0);
+    curV = vec3(abs(sin(coordinates.x)), abs(sin(coordinates.y)), abs(sin(coordinates.z)));
+    gl_PointSize = 10.0;
     // gl_Position = vec4(coordinates, 1.0);
 }
