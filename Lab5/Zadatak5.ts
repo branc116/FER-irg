@@ -4,7 +4,7 @@ import { Vector } from "../Helpers/Helpers.js";
 import { Mesh } from "./Model.js";
 import { OrbitCamera } from "../Cameras/OrbitCamera.js";
 import { Point } from "../Drawables/Point.js";
-
+import * as m from "../mat4/mat4.js";
 export class Zadatak5 extends SceneAbstract {
     /**
      *
@@ -30,10 +30,31 @@ export class Zadatak5 extends SceneAbstract {
             }
             lastY = cntx.mouseLocation[1];
         }
-        // Mesh.fromUri("/obj/box.obj")
-        //     .then(i => {
-        //         this.replace(undefined, i.getTriangles());
-        //     });
+        Mesh.fromUri("/obj/Postolje_obj.obj")
+            .then(i => {
+                this.replace(undefined, i.getTriangles());
+            });
+        let stip: Triangles;
+        let mm = m.identity(m.create());
+        Mesh.fromUri("/obj/Ruka_obj.obj")
+            .then(i => {
+                const triangles = stip = i.getTriangles();
+                // m.rotateZ(mm, m.identity(m.create()), -1);
+                triangles.transformMatrix = mm;
+                this.replace(undefined, triangles);
+        });
+        Mesh.fromUri("/obj/StipaljkaL_obj.obj")
+        .then(i => {
+            const tri = i.getTriangles();
+            tri.transformMatrix = mm;
+            this.replace(undefined, tri);
+        });
+        Mesh.fromUri("/obj/StipaljkaR_obj.obj")
+        .then(i => {
+            const trinagles = i.getTriangles();
+            trinagles.transformMatrix = mm;
+            this.replace(undefined, trinagles);
+        });
         const input = document.getElementById("Zad5input");
         let newMesh: Mesh = new Mesh();
         if (input) {
@@ -83,6 +104,16 @@ export class Zadatak5 extends SceneAbstract {
                 }
             })
         }
+
+        // window.setInterval(async () => {
+        //     if (!stip)
+        //         return;
+        //     const newAng = await fetch("http://blynk-cloud.com/ad3d8b897617484b9d21b6fe380cf582/get/V5");
+        //     const val = JSON.parse(await newAng.text())[0];
+        //     // var mm = m.identity(m.create());
+        //     m.rotateZ(mm, m.identity(m.create()), Number.parseFloat(val));
+        //     stip.transformMatrix = mm;
+        // }, 200);
         // Mesh.fromString()
     }
     

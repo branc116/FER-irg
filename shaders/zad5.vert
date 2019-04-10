@@ -30,6 +30,8 @@ uniform float u_aspect;
 uniform float u_near;
 uniform float u_far;
 
+uniform mat4 u_objectTransform;
+
 vec2 coord(in vec2 p) {
     p = p / u_resolution.xy;
     // correct aspect ratio
@@ -181,7 +183,7 @@ mat4 rotation (vec3 angles) {
         rotationAxis(angles.z, vec3(0, 0, 1));
 }
 void main() {
-    gl_Position = perspective(u_fov, u_aspect, u_near, u_far) * lookAt(u_cam, u_center, u_up) * rotation(u_globalRotation) * vec4(coordinates, 1.0);
+    gl_Position = perspective(u_fov, u_aspect, u_near, u_far) * lookAt(u_cam, u_center, u_up) * rotation(u_globalRotation) * u_objectTransform * vec4(coordinates, 1.0);
     curV = vec3(abs(sin(coordinates.x)), abs(sin(coordinates.y)), abs(sin(coordinates.z)));
     gl_PointSize = 10.0;
     // gl_Position = vec4(coordinates, 1.0);

@@ -3,3 +3,4 @@ node_modules
 .vscode
 **/*js.map
 *lock.json
+docs/B_Labosi.pdf

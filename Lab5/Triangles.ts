@@ -2,10 +2,16 @@ import { IVector } from "../Helpers/IVector.js";
 import { DrawableAbstract } from "../Drawables/DrawableAbstract.js";
 import { Tetrahedron } from "./Tetrahedron.js";
 import { Vector } from "../Helpers/Helpers.js";
+import * as m from "../mat4/mat4.js";
+import { SceneAbstract } from "../Lab2/SceneAbstract.js";
 
 export class Triangles extends DrawableAbstract<Triangles> {
+    public transformMatrixUniform?: WebGLUniformLocation;
+    public transformMatrix: number[] = m.identity(m.create());
+
     glDrawArray(gl: WebGLRenderingContext): void {
-        gl.uniform1f(this.colorUniform || null, this.color)
+        gl.uniformMatrix4fv(this.transformMatrixUniform || SceneAbstract.trans, false, this.transformMatrix);
+        gl.uniform1f(this.colorUniform || null, this.color);
         gl.drawArrays(gl.TRIANGLES, 0, 3 * this.triangles.length);
     }
     getPoints(): Float32Array {

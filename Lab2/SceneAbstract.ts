@@ -44,6 +44,9 @@ export abstract class SceneAbstract {
     private u_far: null | WebGLUniformLocation = null;
     private u_globalRotation: null | WebGLUniformLocation = null;
 
+    public u_objectTransform: null | WebGLUniformLocation = null;
+    public static trans: null | WebGLUniformLocation = null;
+
     customUnforms: (context: this) => void = () => {};
     public mouseMove: (context: this, button: MouseButton) => void = () => {};
     public mouseClick: (context: this, button: MouseButton) => void | boolean = () => {};
@@ -111,6 +114,9 @@ export abstract class SceneAbstract {
         this.u_up = this.getUniformLocation("u_up");
         
         this.u_globalRotation = this.getUniformLocation("u_globalRotation");
+
+        SceneAbstract.trans =  this.u_objectTransform = this.getUniformLocation("u_objectTransform");
+
 
         this.animateScene();
     }
