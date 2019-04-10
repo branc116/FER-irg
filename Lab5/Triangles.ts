@@ -7,7 +7,7 @@ import { SceneAbstract } from "../Lab2/SceneAbstract.js";
 
 export class Triangles extends DrawableAbstract<Triangles> {
     public transformMatrixUniform?: WebGLUniformLocation;
-    public transformMatrix: number[] = m.identity(m.create());
+    public transformMatrix: Float32Array = m.identity(m.create());
 
     glDrawArray(gl: WebGLRenderingContext): void {
         gl.uniformMatrix4fv(this.transformMatrixUniform || SceneAbstract.trans, false, this.transformMatrix);
