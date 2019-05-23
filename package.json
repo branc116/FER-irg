@@ -11,14 +11,16 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/mathjs": "^5.0.1",
     "http-server": "^0.11.1",
     "serve": "^10.1.2",
     "typescript": "^3.4.2"
   },
   "dependencies": {
+    "@types/highlight.js": "9.12.2",
+    "@types/webgl2": "0.0.4",
     "highlight.js": "^9.15.6",
     "materialize-css": "^1.0.0",
-    "@types/highlight.js": "9.12.2",
-    "@types/webgl2": "0.0.4"
+    "mathjs": "^5.10.3"
   }
 }

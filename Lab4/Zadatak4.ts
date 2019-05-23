@@ -1,10 +1,11 @@
-import { SceneAbstract, MouseButton } from "../Lab2/SceneAbstract.js";
+import { SceneAbstract } from "../Lab2/SceneAbstract.js";
 import { Poligon, StilCrtanja } from "./Poligon.js";
 import { DrawableTyped, Drawable } from "../Drawables/Drawable.js";
 import { Point } from "../Drawables/Point.js";
 import { Vector } from "../Helpers/Helpers.js";
 import { DrawableLine } from "../Drawables/Line.js";
 import { IVector } from "../Helpers/IVector.js";
+import { MouseButton } from "../IScene.js";
 
 export class Zadatak4 extends SceneAbstract {
     /**
@@ -15,7 +16,7 @@ export class Zadatak4 extends SceneAbstract {
     public allOfThePoligonz: Poligon[] = [];
     
     constructor(canvas: HTMLCanvasElement) {
-        super(canvas, "zad4.vert", "zad4.frag");
+        super(canvas, "/Shaders/zad4.vert", "/Shaders/zad4.frag");
         this.mouseMove = (context: this) => {
             if (!this.currentDraw) {
                 this.currentDraw = context.replace(this.currentDraw, new Point(new Vector(context.mouseLocation)));

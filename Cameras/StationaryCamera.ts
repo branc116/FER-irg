@@ -2,11 +2,17 @@ import { AbstractCamera } from "./AbstractCamera.js";
 import { IVector } from "../Helpers/IVector.js";
 
 export class StationaryCamera extends AbstractCamera {
-    constructor(public camLocation: IVector, public lookAt: IVector) {
+    constructor(camLocation?: IVector, lookAt?: IVector) {
         super();
+        if (camLocation) {
+            this.cam = camLocation;
+        }
+        if (lookAt) {
+            this.lookAt = lookAt;
+        }
     }
     public updateCamLocation(time: number) {
-        return this.camLocation;
+        return this.cam;
     }
     public updateLookAt(time: number) {
         return this.lookAt;

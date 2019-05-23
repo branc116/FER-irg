@@ -7,6 +7,7 @@ import { DrawableTyped, Drawable } from "./Drawable.js";
 import { Points } from "./Points.js";
 import { Poligon } from "../Lab4/Poligon.js";
 import { Triangles } from "../Lab5/Triangles.js";
+import { BezierCurve } from "./BezierCurve.js";
 
 export type DrawableString<T extends Drawable> =  T extends DrawableLine ? "Line" :
     T extends Point ? "Point" :
@@ -15,4 +16,5 @@ export type DrawableString<T extends Drawable> =  T extends DrawableLine ? "Line
     T extends LineSegments ? "LineSegment" :
     T extends Points ? "Points" :
     T extends Poligon ? "Poligon" :
-    T extends Triangles ? "Triangles" : never;
+    T extends Triangles ? "Triangles" :
+    T extends BezierCurve ? "BezierCurve" : never;

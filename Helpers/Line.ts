@@ -1,4 +1,4 @@
-import { IVector } from "./IVector";
+import { IVector } from "./IVector.js";
 import { Matrix } from "./Helpers.js";
 function eq(a: number, b: number) {
     return Math.abs(a - b) < 0.00001;

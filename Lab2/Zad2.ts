@@ -9,7 +9,7 @@ export class Zadatak2 extends SceneAbstract {
     public currentPoint?: Drawable;
 
     constructor(canvas: HTMLCanvasElement){
-        super(canvas);
+        super(canvas, "/shaders/zad2_vector_shader.vert", "/shaders/zad2_frag_shader.frag");
         this.currentPoint = new Point(new Vector([0, 0]));
         this.mouseMove = (context: this) => {
             if (!this.currentPoint) {

@@ -1,4 +1,5 @@
 import { IMatrix } from "./IMatrix.js";
+import { vec3 } from "../mat4/mat4.js";
 
 export interface IVector {
     get: (index: number) => number;
@@ -22,6 +23,7 @@ export interface IVector {
     nFromHomogeneus: () => IVector;
     toRowMatrix: (liveView: boolean) => IMatrix;
     toColumnMatrix: (liveView: boolean) => IMatrix;
+    toVec3: () => vec3;
     getK: (vector: IVector) => number;
     toArray: () => number[];
     toString: () => string;

@@ -1,5 +1,6 @@
 import { IMatrix } from "./IMatrix.js";
 import { IVector } from "./IVector.js";
+import { vec3 } from "../mat4/mat4.js";
 
 
 export abstract class AbstractMatrix implements IMatrix {
@@ -188,6 +189,9 @@ export class MatrixTransposeView extends AbstractMatrix {
 
 
 export abstract class AbstractVector implements IVector {
+    toVec3 = () : vec3 => {
+        return [this.get(0), this.get(1), this.get(2)];
+    }
     
     abstract get: (index: number) => number;
     abstract set: (index: number, value: number) => IVector;

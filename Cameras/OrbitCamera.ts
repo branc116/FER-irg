@@ -1,17 +1,14 @@
 import { AbstractCamera } from "./AbstractCamera.js";
 import { IVector } from "../Helpers/IVector.js";
-import { Vector } from "../Helpers/Helpers.js";
 
 export class OrbitCamera extends AbstractCamera {
-    public lookAt = new Vector([0, 0, 0]);
-    private cam = new Vector([0, 0, 0]);
     private neg = false;
     private negx = false;
     private negt = false;
     private t = 0;
     constructor (public radius: number, public speed: number) {
         super();
-        this.cam.set(1, radius);
+        this.cam.set(1, radius);  
     }
     public updateCamLocation(time: number): IVector
     {

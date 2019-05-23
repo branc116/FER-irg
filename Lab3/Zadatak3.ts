@@ -19,7 +19,7 @@ export class Zadatak3 extends SceneAbstract {
         return undefined;
     }
     constructor(canvas: HTMLCanvasElement, public kontrola: boolean, public odsjecanje?: number | boolean) {
-        super(canvas, "zad3.vert", "zad3.frag");
+        super(canvas, "/Shaders/zad3.vert", "/Shaders/zad3.frag");
         this.mouseMove = (context: this) => {
             if (!this.currentPoint) {
                 this.currentPoint = context.replace(this.currentPoint, new Point(new Vector(context.mouseLocation)));
@@ -78,7 +78,7 @@ export class Zadatak3 extends SceneAbstract {
         const dx=5;
         
         var k = (line[1].get(1) - line[0].get(1)) / (line[1].get(0) - line[0].get(0));
-        const retArr = [];
+        const retArr: IVector[] = [];
         
         if (Math.abs(k) < 1) {
             const [first, last] = line[0].get(0 ) < line[1].get(0) ? [line[0], line[1]] : [line[1], line[0]];

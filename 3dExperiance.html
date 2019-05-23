@@ -9,7 +9,1070 @@
 <body>
     <canvas height="1000" width="1000" id="3d"></canvas>
 </body>
-<script type="module">
-    import * as a from "./3d.js";
+<!-- <script src="./3dB.js"></script> -->
+<script>
+    class AbstractMatrix {
+    constructor() {
+        this.hfe = (action) => {
+            for (let i = 0; i < this.getRowCount(); i++) {
+                for (let j = 0; j < this.getColCount(); j++) {
+                    action(i, j);
+                }
+            }
+        };
+        this.nTranspone = (liveView) => {
+            if (liveView)
+                return new MatrixTransposeView(this);
+            var nM = this.newInstance(this.getColCount(), this.getRowCount());
+            this.hfe((row, col) => {
+                nM.set(col, row, this.get(row, col));
+            });
+            return nM;
+        };
+        this.add = (matrix) => {
+            if (this.getColCount() != matrix.getColCount() || this.getRowCount() != matrix.getRowCount())
+                throw new Error("Can't add or sub matrixies that are not of the same dimensions");
+            this.hfe((row, col) => {
+                this.set(row, col, this.get(row, col) + matrix.get(row, col));
+            });
+            return this;
+        };
+        this.nAdd = (matrix) => {
+            if (this.getColCount() != matrix.getColCount() || this.getRowCount() != matrix.getRowCount())
+                throw new Error("Can't add or sub matrixies that are not of the same dimensions");
+            const nM = this.copy();
+            this.hfe((row, col) => {
+                nM.set(row, col, this.get(row, col) + matrix.get(row, col));
+            });
+            return nM;
+        };
+        this.sub = (matrix) => {
+            if (this.getColCount() != matrix.getColCount() || this.getRowCount() != matrix.getRowCount())
+                throw new Error("Can't add or sub matrixies that are not of the same dimensions");
+            this.hfe((row, col) => {
+                this.set(row, col, this.get(row, col) - matrix.get(row, col));
+            });
+            return this;
+        };
+        this.nSub = (matrix) => {
+            if (this.getColCount() != matrix.getColCount() || this.getRowCount() != matrix.getRowCount())
+                throw new Error("Can't add or sub matrixies that are not of the same dimensions");
+            const nM = this.copy();
+            this.hfe((row, col) => {
+                nM.set(row, col, this.get(row, col) - matrix.get(row, col));
+            });
+            return nM;
+        };
+        this.nMultipy = (matrix) => {
+            if (this.getColCount() != matrix.getRowCount())
+                throw new Error(`Can't mutiplay matrix of dimensions (${this.getRowCount()}, ${this.getColCount()}) with matrix of dimensions (${matrix.getRowCount(), matrix.getColCount()})`);
+            const nM = this.newInstance(this.getRowCount(), matrix.getColCount());
+            nM.hfe((row, col) => {
+                let sum = 0;
+                for (let i = 0; i < this.getColCount(); i++) {
+                    sum += this.get(row, i) * matrix.get(i, col);
+                }
+                nM.set(row, col, sum);
+            });
+            return nM;
+        };
+        this.determinant = () => {
+            if (this.getRowCount() != this.getColCount())
+                throw new Error("Determinant is only defined on squeare matrix");
+            if (this.getRowCount() == 1)
+                return this.get(0, 0);
+            if (this.getRowCount() == 2)
+                return this.get(0, 0) * this.get(1, 1) - this.get(0, 1) * this.get(1, 0);
+            let sum = 0;
+            for (let i = 0; i < this.getRowCount(); i++) {
+                const subM = this.subMarix(0, i, true);
+                const cur = (i % 2 == 0 ? 1 : -1) * this.get(0, i) * subM.determinant();
+                sum += cur;
+            }
+            return sum;
+        };
+        this.subMarix = (row, col, flag) => {
+            if (flag)
+                return new MatrixSubMatrixView(this, row, col);
+            const subMatrix = this.newInstance(this.getRowCount() - 1, this.getColCount() - 1);
+            let curRow = 0;
+            for (let j = 0; j < (this.getRowCount()); j++) {
+                if (j == row)
+                    continue;
+                let curCol = 0;
+                for (let k = 0; k < (this.getColCount()); k++) {
+                    if (k == col)
+                        continue;
+                    subMatrix.set(curRow, curCol, this.get(j, k));
+                    curCol++;
+                }
+                curRow++;
+            }
+            return subMatrix;
+        };
+        this.subMarix2 = (row, col, flag) => {
+            const newInstance = this.newInstance(row, col);
+            for (let rowC = 0; rowC < row; rowC++) {
+                for (let colC = 0; colC < col; colC++) {
+                    const element = this.getRowCount() > rowC && this.getColCount() > colC ? this.get(rowC, colC) : 0;
+                    newInstance.set(rowC, colC, element);
+                }
+            }
+            return newInstance;
+        };
+        this.nInvert = () => {
+            if (this.getColCount() != this.getRowCount())
+                throw new Error("Can't get invers of non squere matrix");
+            var newInstance = this.newInstance(this.getRowCount(), this.getColCount());
+            const det = this.determinant();
+            this.hfe((row, col) => {
+                newInstance.set(col, row, ((row + col) % 2 == 1 ? -1 : 1) * this.subMarix(row, col, true).determinant() / det);
+            });
+            return newInstance;
+        };
+        this.toArray = () => {
+            const endArray = [];
+            for (let row = 0; row < this.getRowCount(); row++) {
+                const curRow = [];
+                for (let col = 0; col < this.getColCount(); col++) {
+                    curRow.push(this.get(row, col));
+                }
+                endArray.push(curRow);
+            }
+            return endArray;
+        };
+        this.toVector = (flag) => {
+            let arr = this.toArray().reduce((prev, cur, curI, arr) => {
+                return [...prev, ...cur];
+            });
+            return new Vector(arr);
+        };
+        this.toString = () => {
+            const ar = this.toArray();
+            const maxL = Math.max(...ar.reduce((p, c) => [...p, ...c]).map(i => i.toFixed(3).length)) + 2;
+            return ar
+                .map(i => {
+                return '[' + i.map(i => {
+                    const cur = (i < 0 ? '' : ' ') + i.toFixed(3);
+                    const curL = maxL - cur.length;
+                    const spaces = [...Array(curL).keys()].map(i => ' ').reduce((p, c) => p + c);
+                    return cur + spaces;
+                }).reduce((prev, cur) => `${prev}, ${cur}`) + ']';
+            })
+                .reduce((prev, cur) => `${prev}, \n${cur}`);
+        };
+    }
+}
+class MatrixTransposeView extends AbstractMatrix {
+    constructor(matrix) {
+        super();
+        this.matrix = matrix;
+        this.getRowCount = () => {
+            return this.matrix.getColCount();
+        };
+        this.getColCount = () => {
+            return this.matrix.getRowCount();
+        };
+        this.get = (row, col) => {
+            return this.matrix.get(col, row);
+        };
+        this.set = (row, col, value) => {
+            this.matrix.set(col, row, value);
+            return this;
+        };
+        this.copy = () => {
+            return new Matrix(this.getRowCount(), this.getColCount(), [...[...Array(this.getRowCount()).keys()].map(i => [...Array(this.getColCount()).keys()].map(j => this.get(i, j)))]);
+        };
+        this.newInstance = (row, col) => {
+            const rm = this.getRowCount();
+            const cm = this.getColCount();
+            return new Matrix(row, col, [...[...Array(row).keys()].map(i => [...Array(col).keys()].map(j => rm >= i || cm >= j ? 0 : this.get(i, j)))]);
+        };
+    }
+}
+class AbstractVector {
+    constructor() {
+        this.getK = (vector) => {
+            if (this.getDimensions() != 2 && vector.getDimensions() != 2)
+                throw new Error("Can't get k from vectors with dimensions other than 2");
+            return (vector.get(1) - this.get(1)) / (vector.get(0) - this.get(0));
+        };
+        this.copyPart = (index) => {
+            const ni = this.newInstance(index);
+            for (var i = 0; i < index; i++) {
+                ni.set(i, this.get(i) || 0);
+            }
+            return ni;
+        };
+        this.add = (vector) => {
+            if (vector.getDimensions() != this.getDimensions())
+                throw new Error("Can't add vectors of different dimensions");
+            for (var i = 0; i < this.getDimensions(); i++) {
+                this.set(i, this.get(i) + vector.get(i));
+            }
+            return this;
+        };
+        this.nAdd = (vector) => {
+            const newVector = this.newInstance(this.getDimensions());
+            if (vector.getDimensions() != this.getDimensions())
+                throw new Error("Can't add vectors of different dimensions");
+            for (var i = 0; i < this.getDimensions(); i++) {
+                newVector.set(i, this.get(i) + vector.get(i));
+            }
+            return newVector;
+        };
+        this.sub = (vector) => {
+            if (vector.getDimensions() != this.getDimensions())
+                throw new Error("Can't add vectors of different dimensions");
+            for (var i = 0; i < this.getDimensions(); i++) {
+                this.set(i, this.get(i) - vector.get(i));
+            }
+            return this;
+        };
+        this.nSub = (vector) => {
+            const newVector = this.newInstance(this.getDimensions());
+            if (vector.getDimensions() != this.getDimensions())
+                throw new Error("Can't add vectors of different dimensions");
+            for (var i = 0; i < this.getDimensions(); i++) {
+                newVector.set(i, this.get(i) - vector.get(i));
+            }
+            return newVector;
+        };
+        this.scalarMultiply = (scalar) => {
+            for (var i = 0; i < this.getDimensions(); i++) {
+                this.set(i, this.get(i) * scalar);
+            }
+            return this;
+        };
+        this.nScalarMultiply = (scalar) => {
+            const newVector = this.newInstance(this.getDimensions());
+            for (var i = 0; i < this.getDimensions(); i++) {
+                newVector.set(i, this.get(i) * scalar);
+            }
+            return newVector;
+        };
+        this.norm = () => {
+            var sum = 0;
+            for (let i = 0; i < this.getDimensions(); i++) {
+                sum += this.get(i) * this.get(i);
+            }
+            return Math.sqrt(sum);
+        };
+        this.normalize = () => this.scalarMultiply(1 / this.norm());
+        this.nNormalize = () => this.nScalarMultiply(1 / this.norm());
+        this.cosine = (vector) => this.scalarProduct(vector) / (this.norm() * vector.norm());
+        this.scalarProduct = (vector) => {
+            if (this.getDimensions() != vector.getDimensions())
+                throw new Error("can't get scalar product of vectors of different dimensions");
+            let sum = 0;
+            for (let i = 0; i < this.getDimensions(); i++) {
+                sum += this.get(i) * vector.get(i);
+            }
+            return sum;
+        };
+        this.nVectorProduct = (vector) => {
+            if (this.getDimensions() != vector.getDimensions() || this.getDimensions() != 3)
+                throw new Error("Can't get vector product of vector of dimensions other than 3");
+            var nV = this.newInstance(this.getDimensions());
+            nV.set(0, this.get(1) * vector.get(2) - this.get(2) * vector.get(1));
+            nV.set(1, -this.get(0) * vector.get(2) + this.get(2) * vector.get(0));
+            nV.set(2, this.get(0) * vector.get(1) - this.get(1) * vector.get(0));
+            return nV;
+        };
+        this.nFromHomogeneus = () => {
+            var newVector = this.copyPart(this.getDimensions() - 1);
+            for (var i = 0; i < newVector.getDimensions(); i++) {
+                newVector.set(i, newVector.get(i) / this.get(this.getDimensions() - 1));
+            }
+            return newVector;
+        };
+        this.toRowMatrix = (liveView) => liveView ? new MatrixVectorView(this, true) : new MatrixVectorView(this, true).copy();
+        this.toColumnMatrix = (liveView) => liveView ? new MatrixVectorView(this, false) : new MatrixVectorView(this, false).copy();
+        this.toArray = () => {
+            const arr = [];
+            for (var i = 0; i < this.getDimensions(); i++) {
+                arr.push(this.get(i));
+            }
+            return arr;
+        };
+        this.toString = () => {
+            return '[' + this.toArray().map(i => i.toFixed(3)).reduce((pr, cur) => pr + ', ' + cur) + ']';
+        };
+    }
+}
+class MatrixSubMatrixView extends AbstractMatrix {
+    /**
+     *
+     */
+    constructor(matrix, row, col) {
+        super();
+        this.matrix = matrix;
+        this.getRowCount = () => this.rowIndicies.length;
+        this.getColCount = () => this.colIndicies.length;
+        this.get = (row, col) => this.matrix.get(this.rowIndicies[row], this.colIndicies[col]);
+        this.set = (row, col, value) => {
+            this.matrix.set(this.rowIndicies[row], this.colIndicies[col], value);
+            return this;
+        };
+        this.copy = () => {
+            return new Matrix(this.getRowCount(), this.getColCount(), [...[...Array(this.getRowCount()).keys()].map(i => [...Array(this.getColCount()).keys()].map(j => this.get(i, j)))]);
+        };
+        this.newInstance = (row, col) => {
+            const rm = this.getRowCount();
+            const cm = this.getColCount();
+            return new Matrix(row, col, [...[...Array(row).keys()].map(i => [...Array(col).keys()].map(j => rm >= i || cm >= j ? 0 : this.get(i, j)))]);
+        };
+        this.rowIndicies = [...Array(matrix.getRowCount()).keys()].filter((val) => val != row);
+        this.colIndicies = [...Array(matrix.getColCount()).keys()].filter((val) => val != col);
+    }
+}
+class MatrixVectorView extends AbstractMatrix {
+    constructor(vector, isRowMatrix) {
+        super();
+        this.vector = vector;
+        this.isRowMatrix = isRowMatrix;
+        this.getRowCount = () => this.isRowMatrix ? 1 : this.vector.getDimensions();
+        this.getColCount = () => !this.isRowMatrix ? 1 : this.vector.getDimensions();
+        this.get = (row, col) => {
+            if (this.isRowMatrix) {
+                if (row == 0) {
+                    return this.vector.get(col);
+                }
+            }
+            else {
+                if (col == 0) {
+                    return this.vector.get(row);
+                }
+            }
+            throw new Error("out of range");
+        };
+        this.set = (row, col, value) => {
+            if (this.isRowMatrix) {
+                if (row == 0) {
+                    this.vector.set(col, value);
+                    return this;
+                }
+            }
+            else {
+                if (col == 0) {
+                    this.vector.set(row, value);
+                    return this;
+                }
+            }
+            throw new Error("out of range");
+        };
+        this.copy = () => {
+            return new Matrix(this.getRowCount(), this.getColCount(), [...[...Array(this.getRowCount()).keys()].map(i => [...Array(this.getColCount()).keys()].map(j => this.get(i, j)))]);
+        };
+        this.newInstance = (row, col) => {
+            const rm = this.getRowCount();
+            const cm = this.getColCount();
+            return new Matrix(row, col, [...[...Array(row).keys()].map(i => [...Array(col).keys()].map(j => rm >= i || cm >= j ? 0 : this.get(i, j)))]);
+        };
+    }
+}
+class Vector extends AbstractVector {
+    constructor(values, isLiveView, isReadOnly) {
+        super();
+        this.get = (index) => {
+            return this.elements[index];
+        };
+        this.set = (index, value) => {
+            this.elements[index] = value;
+            return this;
+        };
+        this.getDimensions = () => {
+            return this.dimensions;
+        };
+        this.copy = () => {
+            return new Vector([...[...Array(this.getDimensions()).keys()].map(i => this.get(i))]);
+        };
+        this.newInstance = (index) => {
+            return new Vector([...[...Array(index).keys()].map(i => this.getDimensions() > i ? 0 : this.get(i))]);
+        };
+        this.elements = isLiveView ? values : [...values];
+        this.dimensions = values.length;
+        this.readonly = isReadOnly || false;
+    }
+}
+Vector.parseSimple = (vector) => {
+    return new Vector(vector.split(' ').map(i => Number.parseFloat(i)));
+};
+class Matrix extends AbstractMatrix {
+    /**
+     *
+     */
+    constructor(rows, cols, elemements, liveView) {
+        super();
+        this.rows = rows;
+        this.cols = cols;
+        this.getRowCount = () => {
+            return this.rows;
+        };
+        this.getColCount = () => {
+            return this.cols;
+        };
+        this.get = (row, col) => {
+            return this.elements[row][col];
+        };
+        this.set = (row, col, value) => {
+            this.elements[row][col] = value;
+            return this;
+        };
+        this.copy = () => {
+            return new Matrix(this.getRowCount(), this.getColCount(), [...[...Array(this.getRowCount()).keys()].map(i => [...Array(this.getColCount()).keys()].map(j => this.get(i, j)))]);
+        };
+        this.newInstance = (row, col) => {
+            const rm = this.getRowCount();
+            const cm = this.getColCount();
+            return new Matrix(row, col, [...[...Array(row).keys()].map(i => [...Array(col).keys()].map(j => rm >= i || cm >= j ? 0 : this.get(i, j)))]);
+        };
+        if (elemements)
+            this.elements = liveView ? elemements : [...elemements];
+        else {
+            this.elements = [];
+            for (let row = 0; row < rows; row++) {
+                const curElement = [];
+                for (let col = 0; col < rows; col++) {
+                    curElement.push(0);
+                }
+                this.elements.push(curElement);
+            }
+        }
+    }
+    static parseSimple(str) {
+        var arr = str.split('|').map(i => i.trim().split(' ').map(i => Number.parseFloat(i)));
+        return new Matrix(arr.length, arr[0].length, arr);
+    }
+}
+
+class AbstractCamera {
+}
+
+class StationaryCamera extends AbstractCamera {
+    constructor(camLocation, lookAt) {
+        super();
+        this.camLocation = camLocation;
+        this.lookAt = lookAt;
+    }
+    updateCamLocation(time) {
+        return this.camLocation;
+    }
+    updateLookAt(time) {
+        return this.lookAt;
+    }
+}
+
+var MouseButton;
+(function (MouseButton) {
+    MouseButton[MouseButton["Left"] = 1] = "Left";
+    MouseButton[MouseButton["Middle"] = 2] = "Middle";
+    MouseButton[MouseButton["Right"] = 3] = "Right";
+})(MouseButton || (MouseButton = {}));
+class SceneAbstract {
+    constructor(canvas, vertexShaderName = "zad2_vector_shader.vert", fragmentShaderName = "zad2_frag_shader.frag") {
+        this.canvas = canvas;
+        this.vertexShaderName = vertexShaderName;
+        this.fragmentShaderName = fragmentShaderName;
+        this.cam = new Vector([0, 0, -5]);
+        this.center = new Vector([0, 0, 0]);
+        this.up = new Vector([0, 1, 0]);
+        this.camera = new StationaryCamera(new Vector([0, 0, -5]), new Vector([0, 0, 0]));
+        this.fov = Math.PI / 4;
+        this.aspect = 1.0;
+        this.near = 0.1;
+        this.far = 1000.0;
+        this.globalRotation = new Vector([0, 0, 0]);
+        this.used = false;
+        this.aspectRatio = 1;
+        this.buffer = null;
+        this.drawables = [];
+        this.u_mouse = null;
+        this.u_resolution = null;
+        this.u_time = null;
+        this.u_cam = null;
+        this.u_center = null;
+        this.u_up = null;
+        this.u_fov = null;
+        this.u_aspect = null;
+        this.u_near = null;
+        this.u_far = null;
+        this.u_globalRotation = null;
+        this.u_objectTransform = null;
+        this.customUnforms = () => { };
+        this.mouseMove = () => { };
+        this.mouseClick = () => { };
+        const g = canvas.getContext("webgl2");
+        canvas.addEventListener("mousemove", i => { this.mMove(i); });
+        canvas.addEventListener("mouseup", i => { this.mClick(i); });
+        canvas.addEventListener("contextmenu", i => { i.preventDefault(); });
+        canvas.addEventListener("mousedown", i => { return false; });
+        this.mouseLocation = [0, 0];
+        if (!g)
+            throw new Error("no gl");
+        this.gl = g;
+        this.shaderProgram = null;
+        this.drawables = [];
+    }
+    replace(replaced, newElement) {
+        if (replaced) {
+            replaced.Destroy(this.gl);
+            this.drawables = [...this.drawables.filter(i => i.id != replaced.id)];
+        }
+        if (newElement) {
+            newElement.Initialize(this.gl);
+            this.drawables.push(newElement);
+        }
+        return newElement;
+    }
+    mMove(e) {
+        this.mouseLocation[0] = e.offsetX;
+        this.mouseLocation[1] = e.offsetY;
+        this.mouseMove(this, e.buttons);
+    }
+    mClick(e) {
+        return this.mouseClick(this, e.which);
+    }
+    async setup() {
+        const gl = this.gl;
+        const shaderSet = [
+            {
+                type: gl.VERTEX_SHADER,
+                shaderPath: this.vertexShaderName
+            },
+            {
+                type: gl.FRAGMENT_SHADER,
+                shaderPath: this.fragmentShaderName
+            }
+        ];
+        this.shaderProgram = await this.buildShaderProgram(shaderSet);
+        this.aspectRatio = this.canvas.width / this.canvas.height;
+        this.drawables.forEach(i => i.Initialize(gl));
+        this.u_time = this.getUniformLocation("u_time");
+        this.u_resolution = this.getUniformLocation("u_resolution");
+        this.u_mouse = this.getUniformLocation("u_mouse");
+        this.u_fov = this.getUniformLocation("u_fov");
+        this.u_aspect = this.getUniformLocation("u_aspect");
+        this.u_near = this.getUniformLocation("u_near");
+        this.u_far = this.getUniformLocation("u_far");
+        this.u_cam = this.getUniformLocation("u_cam");
+        this.u_center = this.getUniformLocation("u_center");
+        this.u_up = this.getUniformLocation("u_up");
+        this.u_globalRotation = this.getUniformLocation("u_globalRotation");
+        SceneAbstract.trans = this.u_objectTransform = this.getUniformLocation("u_objectTransform");
+        this.animateScene();
+    }
+    getUniformLocation(uniformName) {
+        if (!this.shaderProgram)
+            throw new Error("no shader program");
+        return this.gl.getUniformLocation(this.shaderProgram, uniformName);
+    }
+    animateScene(currentTime = 0) {
+        if (!this.shaderProgram)
+            throw new Error("No Shader program");
+        const gl = this.gl;
+        gl.enable(gl.DEPTH_TEST);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.useProgram(this.shaderProgram);
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        gl.clearColor(0.8, 0.9, 1.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform2fv(this.u_mouse, this.mouseLocation);
+        gl.uniform2fv(this.u_resolution, [this.canvas.width, this.canvas.height]);
+        gl.uniform1f(this.u_time, currentTime);
+        gl.uniform3fv(this.u_cam, this.camera.updateCamLocation(currentTime).toArray());
+        gl.uniform3fv(this.u_center, this.camera.updateLookAt(currentTime).toArray());
+        gl.uniform3fv(this.u_up, this.up.toArray());
+        gl.uniform1f(this.u_fov, this.fov);
+        gl.uniform1f(this.u_aspect, this.aspect);
+        gl.uniform1f(this.u_near, this.near);
+        gl.uniform1f(this.u_far, this.far);
+        gl.uniform3fv(this.u_globalRotation, this.globalRotation.toArray());
+        this.customUnforms(this);
+        for (let i = 0; i < this.drawables.length; i++) {
+            if (this.drawables[i].enable())
+                this.drawables[i].Draw(gl, this.shaderProgram, "coordinates");
+        }
+        window.requestAnimationFrame((currentTime) => {
+            this.animateScene(currentTime);
+        });
+    }
+    async loadShader(shaderPath, type) {
+        const ret = await fetch(`${shaderPath}`)
+            .then(i => i.text())
+            .then(i => {
+            var shader = this.gl.createShader(type);
+            if (!shader)
+                throw new Error(`No ${shaderPath} Shader`);
+            this.gl.shaderSource(shader, i);
+            this.gl.compileShader(shader);
+            const errors = this.gl.getShaderInfoLog(shader);
+            console.log(`${shaderPath}: ${errors}`);
+            return shader;
+        })
+            .catch(i => { console.error(i); throw new Error(`No ${shaderPath} shader ${i}`); });
+        return ret;
+    }
+    async buildShaderProgram(shaderInfo) {
+        const program = this.gl.createProgram();
+        if (!program)
+            throw new Error("NoProgram");
+        for (let i = 0; i < shaderInfo.length; i++) {
+            let shader = await this.loadShader(shaderInfo[i].shaderPath, shaderInfo[i].type);
+            if (shader) {
+                this.gl.attachShader(program, shader);
+            }
+        }
+        this.gl.linkProgram(program);
+        if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
+            console.log("Error linking shader program:");
+            console.log(this.gl.getProgramInfoLog(program));
+        }
+        return program;
+    }
+}
+SceneAbstract.trans = null;
+
+class DrawableAbstract {
+    constructor() {
+        this.buffer = null;
+        this.inited = false;
+        this.enable = () => true;
+        this.id = DrawableAbstract.counter++;
+    }
+    Draw(gl, program, atributeLocationName) {
+        if (this.enable()) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+            const coords = gl.getAttribLocation(program, atributeLocationName);
+            gl.enableVertexAttribArray(coords);
+            gl.vertexAttribPointer(coords, this.getDimensions(), gl.FLOAT, false, 0, 0);
+            this.glDrawArray(gl);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        }
+    }
+    Destroy(gl) {
+        gl.deleteBuffer(this.buffer);
+    }
+    Initialize(gl) {
+        if (!this.inited) {
+            this.buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, this.getPoints(), gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            this.inited = true;
+        }
+    }
+}
+DrawableAbstract.counter = 0;
+
+class Tetrahedron {
+    constructor(points) {
+        this.points = points;
+    }
+    signedArea() {
+        const a = this.points[0];
+        const b = this.points[1];
+        const c = this.points[2];
+        const d = this.points[3];
+        return a
+            .nSub(b)
+            .scalarProduct(b
+            .nSub(d)
+            .nVectorProduct(c.nSub(d))) / 6;
+    }
+}
+
+/**
+ * Common utilities
+ * @module glMatrix
+ */
+let ARRAY_TYPE = Float32Array;
+const degree = Math.PI / 180;
+if (!Math.hypot)
+    Math.hypot = function () {
+        var y = 0, i = arguments.length;
+        while (i--)
+            y += arguments[i] * arguments[i];
+        return Math.sqrt(y);
+    };
+
+/**
+ * 4x4 Matrix<br>Format: column-major, when typed out it looks like row-major<br>The matrices are being post multiplied.
+ * @module mat4
+ */
+/**
+ * Creates a new identity mat4
+ *
+ * @returns {mat4} a new 4x4 matrix
+ */
+function create() {
+    let out = new ARRAY_TYPE(16);
+    if (ARRAY_TYPE != Float32Array) {
+        out[1] = 0;
+        out[2] = 0;
+        out[3] = 0;
+        out[4] = 0;
+        out[6] = 0;
+        out[7] = 0;
+        out[8] = 0;
+        out[9] = 0;
+        out[11] = 0;
+        out[12] = 0;
+        out[13] = 0;
+        out[14] = 0;
+    }
+    out[0] = 1;
+    out[5] = 1;
+    out[10] = 1;
+    out[15] = 1;
+    return out;
+}
+/**
+ * Set a mat4 to the identity matrix
+ *
+ * @param {mat4} out the receiving matrix
+ * @returns {number[]} out
+ */
+function identity(out) {
+    out[0] = 1;
+    out[1] = 0;
+    out[2] = 0;
+    out[3] = 0;
+    out[4] = 0;
+    out[5] = 1;
+    out[6] = 0;
+    out[7] = 0;
+    out[8] = 0;
+    out[9] = 0;
+    out[10] = 1;
+    out[11] = 0;
+    out[12] = 0;
+    out[13] = 0;
+    out[14] = 0;
+    out[15] = 1;
+    return out;
+}
+/**
+ * Rotates a matrix by the given angle around the Z axis
+ *
+ * @param {mat4} out the receiving matrix
+ * @param {mat4} a the matrix to rotate
+ * @param {Number} rad the angle to rotate the matrix by
+ * @returns {mat4} out
+ */
+function rotateZ(out, a, rad) {
+    let s = Math.sin(rad);
+    let c = Math.cos(rad);
+    let a00 = a[0];
+    let a01 = a[1];
+    let a02 = a[2];
+    let a03 = a[3];
+    let a10 = a[4];
+    let a11 = a[5];
+    let a12 = a[6];
+    let a13 = a[7];
+    if (a !== out) { // If the source and destination differ, copy the unchanged last row
+        out[8] = a[8];
+        out[9] = a[9];
+        out[10] = a[10];
+        out[11] = a[11];
+        out[12] = a[12];
+        out[13] = a[13];
+        out[14] = a[14];
+        out[15] = a[15];
+    }
+    // Perform axis-specific matrix multiplication
+    out[0] = a00 * c + a10 * s;
+    out[1] = a01 * c + a11 * s;
+    out[2] = a02 * c + a12 * s;
+    out[3] = a03 * c + a13 * s;
+    out[4] = a10 * c - a00 * s;
+    out[5] = a11 * c - a01 * s;
+    out[6] = a12 * c - a02 * s;
+    out[7] = a13 * c - a03 * s;
+    return out;
+}
+
+class Triangles extends DrawableAbstract {
+    constructor(triangles, colorUniform, color = 0) {
+        super();
+        this.triangles = triangles;
+        this.colorUniform = colorUniform;
+        this.color = color;
+        this.transformMatrix = identity(create());
+        this.buffer = null;
+        this.type = "Triangles";
+    }
+    glDrawArray(gl) {
+        gl.uniformMatrix4fv(this.transformMatrixUniform || SceneAbstract.trans, false, this.transformMatrix);
+        gl.uniform1f(this.colorUniform || null, this.color);
+        gl.drawArrays(gl.TRIANGLES, 0, 3 * this.triangles.length);
+    }
+    getPoints() {
+        const pnts = [];
+        for (let i = 0; i < this.triangles.length; i++) {
+            const ele = this.triangles[i];
+            for (let j = 0; j < ele.length; j++) {
+                const element = ele[j];
+                pnts.push(...element.toArray());
+            }
+        }
+        return new Float32Array(pnts);
+    }
+    getDimensions() {
+        return this.triangles[0][0].getDimensions();
+    }
+    isInside(point) {
+        const farrAwayPoint = new Vector([10000 * (Math.random() + 1), 10000 * (Math.random() + 1), 10000 * (Math.random() + 1)]);
+        let intersecrionCount = 0;
+        for (let i = 0; i < this.triangles.length; i++) {
+            const [a, b, c] = this.triangles[i];
+            const ar1 = new Tetrahedron([point, a, b, c]).signedArea();
+            const ar2 = new Tetrahedron([farrAwayPoint, a, b, c]).signedArea();
+            const ar3 = new Tetrahedron([point, farrAwayPoint, a, b]).signedArea();
+            const ar4 = new Tetrahedron([point, farrAwayPoint, b, c]).signedArea();
+            const ar5 = new Tetrahedron([point, farrAwayPoint, c, a]).signedArea();
+            if (Math.sign(ar1) != Math.sign(ar2) && Math.sign(ar3) == Math.sign(ar4) && Math.sign(ar4) == Math.sign(ar5))
+                intersecrionCount++;
+        }
+        return intersecrionCount % 2 == 1;
+    }
+}
+
+class Mesh {
+    constructor() {
+        this.verticies = [];
+        this.facesVertexIndexs = [];
+    }
+    static async fromUri(modelUri) {
+        const res = await fetch(modelUri);
+        const txt = await res.text();
+        return Mesh.fromString(txt);
+    }
+    static fromString(modelDefinition) {
+        const linez = modelDefinition.split('\n');
+        const mesh = new Mesh();
+        for (let i = 0; i < linez.length; i++) {
+            const line = linez[i];
+            var l = line.split(' ');
+            if (l[0] == 'v')
+                mesh.verticies.push(new Vector(l.map(i => Number.parseFloat(i)).filter(i => !!i || i == 0)));
+            if (l[0] == 'f') {
+                const fs = l.map(i => Number.parseInt(i.split('/')[0])).filter(i => !!i || i == 0);
+                for (let i = 2; i < fs.length; i++) {
+                    const v1 = fs[0] - 1;
+                    const v2 = fs[i - 1] - 1;
+                    const v3 = fs[i] - 1;
+                    if (v1 == NaN || v2 == NaN || NaN == v3)
+                        continue;
+                    mesh.facesVertexIndexs.push([v1, v2, v3]);
+                }
+            }
+        }
+        return mesh;
+    }
+    getTriangles() {
+        var vs = this.facesVertexIndexs.map(i => [this.verticies[i[0]], this.verticies[i[1]], this.verticies[i[2]]]);
+        return new Triangles(vs);
+    }
+    normalize() {
+        let max = 0;
+        for (let i = 0; i < this.verticies.length; i++) {
+            const [x, y, z] = this.verticies[i].toArray();
+            max = Math.max(Math.abs(x), Math.abs(y), Math.abs(z), max);
+        }
+        for (let i = 0; i < this.verticies.length; i++) {
+            const v = this.verticies[i];
+            v.scalarMultiply(1 / max);
+        }
+        return this;
+    }
+    toObj() {
+        let retStr = "";
+        retStr += this.verticies
+            .map(i => `v ${i.get(0)} ${i.get(1)} ${i.get(2)}`)
+            .reduce((p, c) => p + '\n' + c) + '\n';
+        retStr += this.facesVertexIndexs.map(i => `f ${i[0] + 1} ${i[1] + 1} ${i[2] + 1}`)
+            .reduce((p, c) => p + '\n' + c) + '\n';
+        return retStr;
+    }
+}
+
+class OrbitCamera extends AbstractCamera {
+    constructor(radius, speed) {
+        super();
+        this.radius = radius;
+        this.speed = speed;
+        this.lookAt = new Vector([0, 0, 0]);
+        this.cam = new Vector([0, 0, 0]);
+        this.neg = false;
+        this.negx = false;
+        this.negt = false;
+        this.t = 0;
+        this.cam.set(1, radius);
+    }
+    updateCamLocation(time) {
+        const x = (this.negx ? -1 : 1) * Math.sqrt(this.t);
+        const y = (this.neg ? -1 : 1) * Math.sqrt(this.radius * this.radius - this.t);
+        this.cam.set(0, x);
+        this.cam.set(1, this.radius);
+        this.cam.set(2, y);
+        this.t += this.speed * (this.negt ? -1 : 1) * (this.radius * this.radius) / 60;
+        if (this.t > this.radius * this.radius) {
+            // t = -r;
+            this.neg = !this.neg;
+            this.negt = !this.negt;
+            this.t = this.radius * this.radius;
+        }
+        if (this.t < 0) {
+            this.negt = !this.negt;
+            this.negx = !this.negx;
+            this.t = 0;
+        }
+        return this.cam;
+    }
+    updateLookAt(time) {
+        return this.lookAt;
+    }
+}
+
+class Point extends DrawableAbstract {
+    constructor(point) {
+        super();
+        this.point = point;
+        this.buffer = null;
+        this.type = "Point";
+        this.enable = () => true;
+    }
+    getDimensions() {
+        return this.point.getDimensions();
+    }
+    glDrawArray(gl) {
+        gl.drawArrays(gl.POINTS, 0, 1);
+    }
+    getPoints() {
+        return new Float32Array(this.point.toArray());
+    }
+}
+
+class Zadatak5 extends SceneAbstract {
+    constructor(canvas) {
+        super(canvas, "https://raw.githubusercontent.com/branc116/FER-irg/master/shaders/zad5.vert", "https://raw.githubusercontent.com/branc116/FER-irg/master/shaders/zad5.frag");
+        const c = this.camera = new OrbitCamera(30, 0.5);
+        canvas.addEventListener("wheel", (ev) => {
+            ev.preventDefault();
+            c.radius *= (Math.sign(ev.deltaY) > 0 ? 1.3 : 1 / 1.3);
+            if (c.radius < 0.1)
+                c.radius = 0.1;
+            return false;
+        });
+        let lastY = 0;
+        this.mouseMove = (cntx, button) => {
+            if (button == MouseButton.Middle) {
+                c.lookAt.set(1, c.lookAt.get(1) + (cntx.mouseLocation[1] - lastY) / 10);
+            }
+            else if (button != 0) {
+                return false;
+            }
+            lastY = cntx.mouseLocation[1];
+        };
+        Mesh.fromUri("https://raw.githubusercontent.com/branc116/FER-irg/master/obj/Postolje_obj.obj")
+            .then(i => {
+            this.replace(undefined, i.getTriangles());
+        });
+        let stip;
+        let mm = identity(create());
+        Mesh.fromUri("https://raw.githubusercontent.com/branc116/FER-irg/master/obj/Ruka_obj.obj")
+            .then(i => {
+            const triangles = stip = i.getTriangles();
+            // m.rotateZ(mm, m.identity(m.create()), -1);
+            triangles.transformMatrix = mm;
+            this.replace(undefined, triangles);
+        });
+        Mesh.fromUri("https://raw.githubusercontent.com/branc116/FER-irg/master/obj/StipaljkaL_obj.obj")
+            .then(i => {
+            const tri = i.getTriangles();
+            tri.transformMatrix = mm;
+            this.replace(undefined, tri);
+        });
+        Mesh.fromUri("https://raw.githubusercontent.com/branc116/FER-irg/master/obj/StipaljkaR_obj.obj")
+            .then(i => {
+            const trinagles = i.getTriangles();
+            trinagles.transformMatrix = mm;
+            this.replace(undefined, trinagles);
+        });
+        const input = document.getElementById("Zad5input");
+        let newMesh = new Mesh();
+        if (input) {
+            const i = input;
+            input.addEventListener("change", (t) => {
+                try {
+                    newMesh = Mesh.fromString(i.value);
+                    const newTriangles = newMesh.getTriangles();
+                    this.curMesh = this.replace(this.curMesh, newTriangles);
+                }
+                catch (e) {
+                    console.error(e);
+                }
+            });
+        }
+        const testPoint = document.getElementById("Zad5testPoint");
+        const out = document.getElementById("Zad5output");
+        const norm = document.getElementById("Zad5norm");
+        if (input && out && norm && testPoint) {
+            const p = testPoint;
+            const i = input;
+            let last = "0, 0, 0";
+            testPoint.addEventListener("keyup", () => {
+                try {
+                    if (p.value == last)
+                        return;
+                    const point = Vector.parseSimple(p.value);
+                    if (point.getDimensions() != 3)
+                        return;
+                    last = p.value;
+                    this.curTestPoinr = this.replace(this.curTestPoinr, new Point(point));
+                    if (this.curMesh) {
+                        const isInside = this.curMesh.isInside(point);
+                        out.innerHTML = isInside ? "Nutra je" : "Nije nutra";
+                    }
+                }
+                catch (e) {
+                    console.error(e);
+                }
+            });
+            norm.addEventListener("click", () => {
+                try {
+                    newMesh = newMesh.normalize();
+                    this.curMesh = this.replace(this.curMesh, newMesh.getTriangles());
+                    i.value = newMesh.toObj();
+                }
+                catch (e) {
+                    console.error(e);
+                }
+            });
+        }
+        window.setInterval(async () => {
+            if (!stip)
+                return;
+            const newAng = await fetch("http://blynk-cloud.com/ad3d8b897617484b9d21b6fe380cf582/get/V5");
+            const val = JSON.parse(await newAng.text())[0];
+            // var mm = m.identity(m.create());
+            rotateZ(mm, identity(create()), Number.parseFloat(val));
+            stip.transformMatrix = mm;
+        }, 200);
+        // Mesh.fromString()
+    }
+}
+
+async function Zad5_1() {
+    const canvas = document.getElementById("3d");
+    if (!canvas)
+        throw new Error("No kanvas");
+    const sa = window.sa = new Zadatak5(canvas);
+    await sa.setup();
+}
+Zad5_1();
+
 </script>
 </html>

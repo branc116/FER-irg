@@ -8,11 +8,10 @@ import { SceneAbstract } from "../Lab2/SceneAbstract.js";
 export class Triangles extends DrawableAbstract<Triangles> {
     public transformMatrixUniform?: WebGLUniformLocation;
     public transformMatrix: Float32Array = m.identity(m.create());
-
     glDrawArray(gl: WebGLRenderingContext): void {
         gl.uniformMatrix4fv(this.transformMatrixUniform || SceneAbstract.trans, false, this.transformMatrix);
         gl.uniform1f(this.colorUniform || null, this.color);
-        gl.drawArrays(gl.TRIANGLES, 0, 3 * this.triangles.length);
+        gl.drawArrays(this.drawMode == "Fill" ? gl.TRIANGLES : gl.LINE_STRIP, 0, 3 * this.triangles.length);
     }
     getPoints(): Float32Array {
         const pnts: number[] = [];
