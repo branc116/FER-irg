@@ -1,7 +1,7 @@
-import { DrawableAbstract } from "../Drawables/DrawableAbstract.js";
+import { DrawableAbstract } from "./DrawableAbstract.js";
 import { IVector } from "../Helpers/IVector.js";
 import { Line } from "../Helpers/Line.js";
-import { LineSegments } from "../Drawables/LineSegments.js";
+import { LineSegments } from "./LineSegments.js";
 import { Vector } from "../Helpers/Helpers.js";
 export enum StilCrtanja {
     Obrub,
@@ -107,7 +107,7 @@ export class Poligon extends DrawableAbstract<Poligon> {
     glDrawArray(gl: WebGLRenderingContext): void {
         const color = 4 * (this.isCW() ? 1 : 0) + 8 * (this.isCCW() ? 1 : 0) + 2;
         gl.uniform1f(this.colorUniform, color);
-        if (this.stilCrtanja == StilCrtanja.Obrub) {
+        if (this.drawMode == "Wireframe") {
             gl.drawArrays(gl.LINE_LOOP, 0, this.points.length);
         }else {
             gl.drawArrays(gl.TRIANGLE_FAN, 0, this.points.length);

@@ -1,4 +1,4 @@
-import { SceneAbstract } from "../Lab2/SceneAbstract.js";
+import { SceneAbstract } from "../SceneAbstract.js";
 import { MouseButton } from "../IScene.js";
 import { Vector } from "../Helpers/Helpers.js";
 

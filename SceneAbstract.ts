@@ -1,11 +1,10 @@
-import { Triangle } from "../Drawables/Triangle.js";
-import { Drawable, DrawableTyped } from "../Drawables/Drawable.js";
-import { Vector } from "../Helpers/Helpers.js";
-import { IVector } from "../Helpers/IVector.js";
-import { AbstractCamera } from "../Cameras/AbstractCamera.js";
-import { StationaryCamera } from "../Cameras/StationaryCamera.js";
-import { IScene, MouseButton } from "../IScene.js";
-import { MouseMoveScript } from "../Scripts/IMouseMoveScript.js";
+import { Drawable, DrawableTyped } from "./Drawables/Drawable.js";
+import { Vector } from "./Helpers/Helpers.js";
+import { IVector } from "./Helpers/IVector.js";
+import { AbstractCamera } from "./Cameras/AbstractCamera.js";
+import { StationaryCamera } from "./Cameras/StationaryCamera.js";
+import { IScene, MouseButton } from "./IScene.js";
+import { MouseMoveScript } from "./Scripts/IMouseMoveScript.js";
 
 
 export abstract class SceneAbstract implements IScene {

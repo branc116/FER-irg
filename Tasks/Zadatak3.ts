@@ -1,4 +1,4 @@
-import { SceneAbstract } from "../Lab2/SceneAbstract.js";
+import { SceneAbstract } from "../SceneAbstract.js";
 import { Drawable, DrawableTyped } from "../Drawables/Drawable.js";
 import { Point } from "../Drawables/Point.js";
 import { Vector } from "../Helpers/Helpers.js";

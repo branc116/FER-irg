@@ -1,4 +1,4 @@
-import { Zadatak5 } from "./Lab5/Zadatak5.js";
+import { Zadatak5 } from "./Tasks/Zadatak5.js";
 
 async function Zad5_1() {
     const canvas = document.getElementById("3d") as HTMLCanvasElement;

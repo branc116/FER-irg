@@ -1,7 +1,7 @@
-import { SceneAbstract } from "../Lab2/SceneAbstract.js";
-import { Triangles } from "./Triangles.js";
+import { SceneAbstract } from "../SceneAbstract.js";
+import { Triangles } from "../Drawables/Triangles.js";
 import { Vector } from "../Helpers/Helpers.js";
-import { Mesh } from "./Model.js";
+import { Mesh } from "../Helpers/Model.js";
 import { Point } from "../Drawables/Point.js";
 import * as m from "../mat4/mat4.js";
 import { StationaryCamera } from "../Cameras/StationaryCamera.js";

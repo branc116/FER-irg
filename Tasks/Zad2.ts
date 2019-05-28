@@ -1,4 +1,4 @@
-import { SceneAbstract } from "./SceneAbstract.js";
+import { SceneAbstract } from "../SceneAbstract.js";
 import { Triangle } from "../Drawables/Triangle.js";
 import { Point } from "../Drawables/Point.js";
 import { DrawableLine } from "../Drawables/Line.js";

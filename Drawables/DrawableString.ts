@@ -5,8 +5,8 @@ import { Quad } from "./Quad.js";
 import { LineSegments } from "./LineSegments.js";
 import { DrawableTyped, Drawable } from "./Drawable.js";
 import { Points } from "./Points.js";
-import { Poligon } from "../Lab4/Poligon.js";
-import { Triangles } from "../Lab5/Triangles.js";
+import { Poligon } from "./Poligon.js";
+import { Triangles } from "./Triangles.js";
 import { BezierCurve } from "./BezierCurve.js";
 
 export type DrawableString<T extends Drawable> =  T extends DrawableLine ? "Line" :

@@ -1,5 +1,5 @@
-import { SceneAbstract } from "../Lab2/SceneAbstract.js";
-import { Poligon, StilCrtanja } from "./Poligon.js";
+import { SceneAbstract } from "../SceneAbstract.js";
+import { Poligon, StilCrtanja } from "../Drawables/Poligon.js";
 import { DrawableTyped, Drawable } from "../Drawables/Drawable.js";
 import { Point } from "../Drawables/Point.js";
 import { Vector } from "../Helpers/Helpers.js";

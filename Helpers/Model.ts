@@ -1,7 +1,7 @@
 import { Triangle } from "../Drawables/Triangle.js";
-import { IVector } from "../Helpers/IVector.js";
-import { Vector } from "../Helpers/Helpers.js";
-import { Triangles } from "./Triangles.js";
+import { IVector } from "./IVector.js";
+import { Vector } from "./Helpers.js";
+import { Triangles } from "../Drawables/Triangles.js";
 
 export class Mesh {
     public verticies: IVector[] = [];

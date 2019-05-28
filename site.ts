@@ -1,11 +1,11 @@
 import { Vector, Matrix } from "./Helpers/Helpers.js";
-import {Zadatak2} from "./Lab2/Zad2.js";
-import { Zadatak3 } from "./Lab3/Zadatak3.js";
-import { Zadatak4 } from "./Lab4/Zadatak4.js";
+import {Zadatak2} from "./Tasks/Zad2.js";
+import { Zadatak3 } from "./Tasks/Zadatak3.js";
+import { Zadatak4 } from "./Tasks/Zadatak4.js";
 import { Line } from "./Helpers/Line.js";
-import { Zadatak5 } from "./Lab5/Zadatak5.js";
-import { Zadatak6 } from "./Lab6/Zadatak6.js";
-import { Zadatak7 } from "./Lab7/Zadatak7.js";
+import { Zadatak5 } from "./Tasks/Zadatak5.js";
+import { Zadatak6 } from "./Tasks/Zadatak6.js";
+import { Zadatak7 } from "./Tasks/Zadatak7.js";
 // import { initHighlighting, listLanguages } from "highlight.js";
 //jhjhdtrdtgf
 function Zad1() {

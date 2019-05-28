@@ -3,7 +3,7 @@ import { Point } from "../Drawables/Point.js";
 import { DrawableLine } from "../Drawables/Line.js";
 import { Drawable } from "../Drawables/Drawable.js";
 import { Vector } from "../Helpers/Helpers.js";
-import { SceneAbstract } from "../Lab2/SceneAbstract.js";
+import { SceneAbstract } from "../SceneAbstract.js";
 import { IVector } from "../Helpers/IVector.js";
 import { BezierCurve } from "../Drawables/BezierCurve.js";
 

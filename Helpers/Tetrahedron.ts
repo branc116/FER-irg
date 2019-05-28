@@ -1,4 +1,4 @@
-import { IVector } from "../Helpers/IVector.js";
+import { IVector } from "./IVector.js";
 
 export class Tetrahedron {
     constructor (public points: [IVector, IVector, IVector, IVector]) {

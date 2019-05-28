@@ -1,9 +1,9 @@
 import { IVector } from "../Helpers/IVector.js";
-import { DrawableAbstract } from "../Drawables/DrawableAbstract.js";
-import { Tetrahedron } from "./Tetrahedron.js";
+import { DrawableAbstract } from "./DrawableAbstract.js";
+import { Tetrahedron } from "../Helpers/Tetrahedron.js";
 import { Vector } from "../Helpers/Helpers.js";
 import * as m from "../mat4/mat4.js";
-import { SceneAbstract } from "../Lab2/SceneAbstract.js";
+import { SceneAbstract } from "../SceneAbstract.js";
 
 export class Triangles extends DrawableAbstract<Triangles> {
     public transformMatrixUniform?: WebGLUniformLocation;

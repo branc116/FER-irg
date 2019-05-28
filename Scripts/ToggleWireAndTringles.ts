@@ -1,5 +1,5 @@
-import { SceneAbstract } from "../Lab2/SceneAbstract.js";
-import { Triangles } from "../Lab5/Triangles.js";
+import { SceneAbstract } from "../SceneAbstract.js";
+import { Triangles } from "../Drawables/Triangles.js";
 let state = false;
 let tri = false;
 export function ToggleWireAndTrinagles(scene: SceneAbstract) {
