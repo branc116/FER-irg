@@ -14,7 +14,7 @@ export class Zadatak6 extends SceneAbstract {
     constructor(canvas: HTMLCanvasElement){
         super(canvas, "/shaders/zad2_vector_shader.vert", "/shaders/zad2_frag_shader.frag");
         this.currentPoint = new Point(new Vector([0, 0]));
-        this.mouseClick = (context: this) => {
+        this.mouseClick = (context: SceneAbstract) => {
             this.points = [...this.points, new Vector([this.mouseLocation[0], this.mouseLocation[1]])];
                 this.curBez = this.replace(this.curBez, new BezierCurve(this.points));
         }

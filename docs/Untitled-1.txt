@@ -1,0 +1,67 @@
+attribute vec3 vertexPosition;
+attribute vec3 vertexNormal;
+
+uniform mat4 mMatrix;
+uniform mat4 minvMatrix;
+uniform mat4 mvMatrix;
+uniform mat4 pMatrix;
+
+uniform vec3 eye;
+uniform int lcomp;
+uniform float shininess;
+
+uniform vec4 lightPosition;
+
+uniform vec3 lightColor;
+uniform vec3 ambientLight;
+uniform vec3 materialAmbCoefs;
+uniform vec3 materialDifCoefs;
+uniform vec3 materialRefCoefs;
+uniform vec3 attnFactors;
+
+varying highp vec3 vColor;
+
+void main(void) {
+
+    highp vec3 pos = (mMatrix * vec4(vertexPosition, 1.0)).xyz;
+    highp vec3 nor = normalize((minvMatrix * vec4(vertexNormal, 1.0)).xyz);
+
+    int directionalModel = abs(lightPosition.w)<0.000001 ? 1 : 0;
+
+    highp vec3 directionalVector = directionalModel==1 ? normalize(lightPosition.xyz) : normalize((lightPosition.xyz / lightPosition.w)-pos);
+
+    highp float directional = max(dot(nor.xyz, directionalVector), 0.0);
+    highp vec3 l = directionalVector;
+
+    highp vec3 reflected = 2.0*dot(l, nor)*nor - l; 
+    highp vec3 ev = normalize(eye - pos);
+    highp float refc = directional<0.0 ? 0.0 : dot(reflected, ev); 
+    highp vec3 ref = refc>0.0 ? lightColor * materialRefCoefs * pow(refc, shininess) : vec3(0.0,0.0,0.0); 
+
+    int tmp = lcomp;
+    int bit0 = (tmp/2)*2 == tmp ? 0 : 1;
+    tmp = tmp/2;
+    int bit1 = (tmp/2)*2 == tmp ? 0 : 1;
+    tmp = tmp/2;
+    int bit2 = (tmp/2)*2 == tmp ? 0 : 1;
+    highp vec3 tmpColor = vec3(0.0, 0.0, 0.0);
+    if(bit0 == 1) tmpColor += ambientLight * materialAmbCoefs;
+    if(bit1 == 1) tmpColor += lightColor * materialDifCoefs * directional;
+    if(bit2 == 1) tmpColor += ref;
+
+    if(directionalModel==0) {
+        float d = length(lightPosition.xyz - pos);
+        tmpColor /= (attnFactors[0] + attnFactors[1]*d + attnFactors[2]*d*d);
+    }
+
+    vColor = clamp(tmpColor, 0.0, 1.0);
+
+    gl_Position = pMatrix * mvMatrix * vec4(vertexPosition, 1.0);
+},
+
+varying highp vec3 vColor;
+
+
+void main(void) {
+gl_FragColor = vec4(vColor, 1.0);
+}

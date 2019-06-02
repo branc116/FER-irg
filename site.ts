@@ -6,6 +6,8 @@ import { Line } from "./Helpers/Line.js";
 import { Zadatak5 } from "./Tasks/Zadatak5.js";
 import { Zadatak6 } from "./Tasks/Zadatak6.js";
 import { Zadatak7 } from "./Tasks/Zadatak7.js";
+import { Zadatak8 } from "./Tasks/Zadatak8.js";
+import { Zadatak9 } from "./Tasks/Zadatak9.js";
 // import { initHighlighting, listLanguages } from "highlight.js";
 //jhjhdtrdtgf
 function Zad1() {
@@ -214,6 +216,20 @@ async function Zad7_1() {
     if (!canvas)
         throw new Error("No kanvas");
     const sa = (window as any).sa = new Zadatak7(canvas);
+    await sa.setup();
+}
+async function Zad8() {
+    const canvas = document.getElementById("CZad8") as HTMLCanvasElement;
+    if (!canvas)
+        throw new Error("No kanvas");
+    const sa = (window as any).sa = new Zadatak8(canvas);
+    await sa.setup();
+}
+async function Zad9() {
+    const canvas = document.getElementById("CZad9") as HTMLCanvasElement;
+    if (!canvas)
+        throw new Error("No kanvas");
+    const sa = (window as any).sa = new Zadatak9(canvas);
     await sa.setup();
 }
 function objToString (obj: any) {

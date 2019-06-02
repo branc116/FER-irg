@@ -20,7 +20,7 @@ export class Zadatak3 extends SceneAbstract {
     }
     constructor(canvas: HTMLCanvasElement, public kontrola: boolean, public odsjecanje?: number | boolean) {
         super(canvas, "/Shaders/zad3.vert", "/Shaders/zad3.frag");
-        this.mouseMove = (context: this) => {
+        this.mouseMove = (context: SceneAbstract) => {
             if (!this.currentPoint) {
                 this.currentPoint = context.replace(this.currentPoint, new Point(new Vector(context.mouseLocation)));
                 return;
@@ -34,7 +34,7 @@ export class Zadatak3 extends SceneAbstract {
                     break;
             }
         }
-        this.mouseClick = (context: this) => {
+        this.mouseClick = (context: SceneAbstract) => {
             if (!this.currentPoint)
                 return;
             switch (this.currentPoint.type) {
@@ -60,7 +60,7 @@ export class Zadatak3 extends SceneAbstract {
                     break;
             }
         }
-        this.customUnforms = (context: this) => {
+        this.customUnforms = (context: SceneAbstract) => {
             let location = this.getUniformLocation("u_cutoff");
             if (this.odsjecanje == undefined) {
                 context.gl.uniform1f(location, 1);

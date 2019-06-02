@@ -5,12 +5,14 @@ import { AbstractCamera } from "./Cameras/AbstractCamera.js";
 import { StationaryCamera } from "./Cameras/StationaryCamera.js";
 import { IScene, MouseButton } from "./IScene.js";
 import { MouseMoveScript } from "./Scripts/IMouseMoveScript.js";
-
+import { LightAbstract } from "./Light/LightAbstract.js";
+import { PointLight } from "./Light/PointLight.js";
 
 export abstract class SceneAbstract implements IScene {
     public camera: AbstractCamera  = new StationaryCamera(new Vector([0, 0, -5]), new Vector([0, 0, 0]));
+    public light: PointLight = new PointLight();
     public mouseMoveScripts: MouseMoveScript[];
-    public preRenderScripts: ((scene: this) => void)[] = [];
+    public preRenderScripts: ((scene: SceneAbstract) => void)[] = [];
     public globalRotation: IVector = new Vector([0, 0, 0]);
     public pressedButtons: string[] = [];
 
@@ -18,7 +20,7 @@ export abstract class SceneAbstract implements IScene {
     public mouseLocation: [number, number];
     public pressedMouseButtons: MouseButton = 0;
 
-    protected gl: WebGL2RenderingContext;
+    public gl: WebGL2RenderingContext;
     protected used: boolean = false;
     protected shaderProgram: WebGLProgram | null;
     protected aspectRatio: number = 1;
@@ -27,6 +29,7 @@ export abstract class SceneAbstract implements IScene {
 
     public drawables: Drawable[] = [];
 
+    
     private u_mouse: null | WebGLUniformLocation = null;
     private u_resolution: null | WebGLUniformLocation = null;
     private u_time: null | WebGLUniformLocation = null;
@@ -36,24 +39,32 @@ export abstract class SceneAbstract implements IScene {
     public u_worldTransform: null | WebGLUniformLocation = null;
     public u_objectTransform: null | WebGLUniformLocation = null;
 
-    public static trans: null | WebGLUniformLocation = null;
+    
 
-    customUnforms: (context: this) => void = () => {};
-    public mouseMove: (context: this, button: MouseButton) => void = () => {};
-    public mouseClick: (context: this, button: MouseButton) => void | boolean = () => {};
+    public id: number;
+    public static trans: null | WebGLUniformLocation = null;
+    public static activeId: number = -1;
+    public static ids = 0;
+
+    customUnforms: (context: SceneAbstract) => void = () => {};
+    public mouseMove: (context:  SceneAbstract, button: MouseButton) => void = () => {};
+    public mouseClick: (context: SceneAbstract, button: MouseButton) => void | boolean = () => {};
 
     constructor(protected canvas: HTMLCanvasElement, private vertexShaderName: string = "zad2_vector_shader.vert", private fragmentShaderName: string = "zad2_frag_shader.frag") {
         const g = canvas.getContext("webgl2");
-        canvas.addEventListener("mousemove",i => { this.mMove(i) });
+        canvas.addEventListener("mousemove",i => { this.mMove(i); SceneAbstract.activeId = this.id; });
         canvas.addEventListener("mouseup", i => {this.mClick(i)} );
         canvas.addEventListener("contextmenu", i => {i.preventDefault();});
         canvas.addEventListener("mousedown", i => {return false;});
         window.addEventListener("keydown", (e) => {
-            this.pressedButtons.findIndex((i) => i == e.key) == -1 ? this.pressedButtons.push(e.key) : undefined;
+            if (this.id == SceneAbstract.activeId) {
+                this.pressedButtons.findIndex((i) => i == e.key) == -1 ? this.pressedButtons.push(e.key) : undefined;
+            }
         }, false);
         window.addEventListener("keyup", (e) => {
-            this.pressedButtons = this.pressedButtons.filter(i => i != e.key);
+            this.pressedButtons = this.pressedButtons.filter(i => i != e.key); 
         }, false);
+        
         this.mouseMoveScripts = [];
         this.mouseLocation = [0, 0];
         if (!g)
@@ -61,6 +72,7 @@ export abstract class SceneAbstract implements IScene {
         this.gl = g;
         this.shaderProgram = null;
         this.drawables = [];
+        this.id = SceneAbstract.ids++;
     }
     public replace<T extends Drawable>(replaced?: Drawable, newElement?: T | undefined): T | undefined {
         if (replaced){
@@ -92,7 +104,6 @@ export abstract class SceneAbstract implements IScene {
         this.mouseMove(this, e.buttons);
     }
     private mClick(e: MouseEvent) {
-        
         return this.mouseClick(this, e.which);
     }
     public async setup() {
@@ -116,13 +127,14 @@ export abstract class SceneAbstract implements IScene {
         this.u_resolution = this.getUniformLocation("u_resolution");
         this.u_mouse = this.getUniformLocation("u_mouse");
 
-
-        
         this.u_globalRotation = this.getUniformLocation("u_globalRotation");
 
         this.u_worldTransform = this.getUniformLocation("u_worldTransfrom");
         this.u_objectTransform = this.getUniformLocation("u_objectTransform");
 
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthFunc(this.gl.LEQUAL);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         this.animateScene();
     }
     public getUniformLocation(uniformName: string) {
@@ -131,35 +143,43 @@ export abstract class SceneAbstract implements IScene {
         return this.gl.getUniformLocation(this.shaderProgram, uniformName);
     }
     public animateScene(currentTime: number = 0) {
-        if (!this.shaderProgram)
-            throw new Error("No Shader program");
-        const gl = this.gl;
-        gl.enable(gl.DEPTH_TEST);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        gl.useProgram(this.shaderProgram);
-        this.preRenderScripts.forEach(i => {
-            i(this);
-        });
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        gl.clearColor(0.8, 0.9, 1.0, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        
-        gl.uniform2fv(this.u_mouse, this.mouseLocation);
-        gl.uniform2fv(this.u_resolution, [this.canvas.width, this.canvas.height]);
-        gl.uniform1f(this.u_time, currentTime);
+        if (this.id == SceneAbstract.activeId) {
+            if (!this.shaderProgram)
+                throw new Error("No Shader program");
+            
+            const gl = this.gl;
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.useProgram(this.shaderProgram);
+            
+                this.preRenderScripts.forEach(i => {
+                    i(this);
+                });
+            
+            gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            
 
-        this.camera.updateCamLocation(currentTime);
-        this.camera.updateLookAt(currentTime);
+            this.camera.aspect = this.canvas.height / this.canvas.width;
+            this.camera.updateCamLocation(currentTime);
+            this.camera.updateLookAt(currentTime);
+            this.camera.updateUniforms(this);
+            
+            this.light.updateUniforms(this);
 
-        gl.uniform3fv(this.u_globalRotation, this.globalRotation.toArray());
-        gl.uniformMatrix4fv(this.u_worldTransform, false, this.camera.getTransformMatrix());
+            gl.uniform2fv(this.u_mouse, this.mouseLocation);
+            gl.uniform2fv(this.u_resolution, [this.canvas.width, this.canvas.height]);
+            gl.uniform1f(this.u_time, currentTime);
 
-        this.customUnforms(this);
-        
-        for (let i = 0;i<this.drawables.length;i++) {
-            if (this.drawables[i].enable())
-                gl.uniformMatrix4fv(this.u_objectTransform, false, this.drawables[i].getDrawablesTransformMatrix());
-                this.drawables[i].Draw(gl, this.shaderProgram, "coordinates");
+            gl.uniform3fv(this.u_globalRotation, this.globalRotation.toArray());
+            gl.uniformMatrix4fv(this.u_worldTransform, false, this.camera.getTransformMatrix());
+
+            this.customUnforms(this);
+            
+            for (let i = 0;i<this.drawables.length;i++) {
+                if (this.drawables[i].enable())
+                    gl.uniformMatrix4fv(this.u_objectTransform, false, this.drawables[i].getDrawablesTransformMatrix());
+                    this.drawables[i].Draw(gl, this.shaderProgram, "coordinates");
+            }
         }
 
         window.requestAnimationFrame((currentTime) => {

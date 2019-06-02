@@ -17,7 +17,7 @@ export class Zadatak4 extends SceneAbstract {
     
     constructor(canvas: HTMLCanvasElement) {
         super(canvas, "/Shaders/zad4.vert", "/Shaders/zad4.frag");
-        this.mouseMove = (context: this) => {
+        this.mouseMove = (context: SceneAbstract) => {
             if (!this.currentDraw) {
                 this.currentDraw = context.replace(this.currentDraw, new Point(new Vector(context.mouseLocation)));
                 return;
@@ -34,13 +34,13 @@ export class Zadatak4 extends SceneAbstract {
                     this.currentDraw = context.replace(this.currentDraw, new Poligon([...this.points, new Vector(context.mouseLocation)], cur.colorUniform));
             }
         }
-        this.mouseClick = (context: this, button) => {
-            if (!context.shaderProgram)
+        this.mouseClick = (context: SceneAbstract, button) => {
+            if (!this.shaderProgram)
                 throw new Error("No shader program");
             if (!this.currentDraw)
                 return;
             if (button == MouseButton.Right) {
-                const finalPoligon = new Poligon(this.points, context.gl.getUniformLocation(context.shaderProgram, "u_color"));
+                const finalPoligon = new Poligon(this.points, context.gl.getUniformLocation(this.shaderProgram, "u_color"));
                 context.replace(this.currentDraw, finalPoligon);
                 this.allOfThePoligonz.push(finalPoligon);
                 this.points = [];
@@ -65,7 +65,7 @@ export class Zadatak4 extends SceneAbstract {
                     break;
                 case "Line":
                     const l = this.currentDraw as DrawableLine;
-                    const seg = new Poligon(this.points, context.gl.getUniformLocation(context.shaderProgram, "u_color"));
+                    const seg = new Poligon(this.points, context.gl.getUniformLocation(this.shaderProgram!, "u_color"));
                     context.replace(l, seg);
                     this.currentDraw = seg;
                     break;

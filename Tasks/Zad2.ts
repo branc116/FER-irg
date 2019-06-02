@@ -11,7 +11,7 @@ export class Zadatak2 extends SceneAbstract {
     constructor(canvas: HTMLCanvasElement){
         super(canvas, "/shaders/zad2_vector_shader.vert", "/shaders/zad2_frag_shader.frag");
         this.currentPoint = new Point(new Vector([0, 0]));
-        this.mouseMove = (context: this) => {
+        this.mouseMove = (context: SceneAbstract) => {
             if (!this.currentPoint) {
                 this.currentPoint = context.replace(this.currentPoint, new Point(new Vector(context.mouseLocation)));
                 return;
@@ -28,7 +28,7 @@ export class Zadatak2 extends SceneAbstract {
                     break;
             }
         }
-        this.mouseClick = (context: this) => {
+        this.mouseClick = (context: SceneAbstract) => {
             if (!this.currentPoint)
                 return;
             switch (this.currentPoint.type) {
